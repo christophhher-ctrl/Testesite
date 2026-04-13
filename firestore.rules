@@ -1,0 +1,155 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: userId
+// Fields:
+//   - email: string (required) - User's email
+//   - name: string (required) - User's display name
+//   - avatarUrl: string (optional) - URL to user's avatar
+//   - role: string (required, ['user', 'admin']) - User's role
+//   - createdAt: timestamp (required) - When the user was created
+//
+// Collection: competitions
+// Document ID: competitionId
+// Fields:
+//   - title: string (required) - Title of the competition
+//   - description: string (required) - Description/Rules
+//   - startDate: timestamp (required) - Start date
+//   - endDate: timestamp (required) - End date
+//   - isActive: bool (required) - Whether the competition is currently active
+//   - winnerPhotoId: string (optional) - ID of the winning photo
+//   - createdAt: timestamp (required) - When the competition was created
+//
+// Collection: photos
+// Document ID: photoId
+// Fields:
+//   - userId: string (required) - ID of the user who submitted
+//   - competitionId: string (required) - ID of the competition
+//   - imageUrl: string (required) - URL to the image in storage
+//   - title: string (required) - Title of the photo
+//   - description: string (optional) - Description of the photo
+//   - voteCount: number (required) - Current vote count
+//   - createdAt: timestamp (required) - When the photo was submitted
+//
+// Collection: votes
+// Document ID: userId_photoId
+// Fields:
+//   - userId: string (required) - ID of the user who voted
+//   - photoId: string (required) - ID of the photo voted for
+//   - competitionId: string (required) - ID of the competition
+//   - createdAt: timestamp (required) - When the vote was cast
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "christophhher@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasRequiredFields(['email', 'name', 'role', 'createdAt']) &&
+             data.email is string && isValidEmail(data.email) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.role in ['user', 'admin'] &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidCompetition(data) {
+      return hasRequiredFields(['title', 'description', 'startDate', 'endDate', 'isActive', 'createdAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.description is string && data.description.size() < 2000 &&
+             data.startDate is timestamp &&
+             data.endDate is timestamp &&
+             data.isActive is bool &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidPhoto(data) {
+      return hasRequiredFields(['userId', 'competitionId', 'imageUrl', 'title', 'voteCount', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             data.competitionId is string &&
+             data.imageUrl is string && isValidUrl(data.imageUrl) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
+             data.voteCount is number && data.voteCount >= 0 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidVote(data) {
+      return hasRequiredFields(['userId', 'photoId', 'competitionId', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             data.photoId is string &&
+             data.competitionId is string &&
+             data.createdAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role == 'user';
+      allow update: if (isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role == resource.data.role) || isAdmin();
+    }
+
+    match /competitions/{competitionId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /photos/{photoId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidPhoto(request.resource.data);
+      allow update: if (isOwner(resource.data.userId) && isValidPhoto(request.resource.data) && request.resource.data.voteCount == resource.data.voteCount) ||
+                    (isAuthenticated() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['voteCount']) &&
+                     request.resource.data.voteCount == resource.data.voteCount + 1) ||
+                    isAdmin();
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    match /votes/{voteId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidVote(request.resource.data) && voteId == request.auth.uid + "_" + request.resource.data.photoId;
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+  }
+}

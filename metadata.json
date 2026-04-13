@@ -1,0 +1,5 @@
+{
+  "name": "PhotoComp",
+  "description": "A modern photo competition platform where users can submit photos for themed contests and vote for their favorites.",
+  "requestFramePermissions": []
+}

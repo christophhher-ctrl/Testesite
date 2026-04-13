@@ -1,0 +1,77 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "name": { "type": "string" },
+        "avatarUrl": { "type": "string", "format": "uri" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "name", "role", "createdAt"]
+    },
+    "Competition": {
+      "title": "Competition",
+      "description": "A themed photo competition",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "startDate": { "type": "string", "format": "date-time" },
+        "endDate": { "type": "string", "format": "date-time" },
+        "isActive": { "type": "boolean" },
+        "winnerPhotoId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "startDate", "endDate", "isActive", "createdAt"]
+    },
+    "Photo": {
+      "title": "Photo",
+      "description": "A photo submitted to a competition",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "competitionId": { "type": "string" },
+        "imageUrl": { "type": "string", "format": "uri" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "voteCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "competitionId", "imageUrl", "title", "voteCount", "createdAt"]
+    },
+    "Vote": {
+      "title": "Vote",
+      "description": "A vote cast by a user for a photo",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "photoId": { "type": "string" },
+        "competitionId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "photoId", "competitionId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/competitions/{competitionId}": {
+      "schema": "Competition",
+      "description": "Competitions"
+    },
+    "/photos/{photoId}": {
+      "schema": "Photo",
+      "description": "Submitted photos"
+    },
+    "/votes/{voteId}": {
+      "schema": "Vote",
+      "description": "Votes cast (ID is usually userId_photoId)"
+    }
+  }
+}
