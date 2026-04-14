@@ -20,6 +20,10 @@ export interface Photo {
   imageUrl: string;
   title: string;
   description?: string;
+  studentName: string;
+  studentGrade: string;
+  studentSchool: string;
+  studentCity: string;
   voteCount: number;
   createdAt: any;
 }

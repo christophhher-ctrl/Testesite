@@ -104,11 +104,15 @@ service cloud.firestore {
     }
 
     function isValidPhoto(data) {
-      return hasRequiredFields(['userId', 'competitionId', 'imageUrl', 'title', 'voteCount', 'createdAt']) &&
+      return hasRequiredFields(['userId', 'competitionId', 'imageUrl', 'title', 'studentName', 'studentGrade', 'studentSchool', 'studentCity', 'voteCount', 'createdAt']) &&
              data.userId == request.auth.uid &&
              data.competitionId is string &&
              data.imageUrl is string && isValidUrl(data.imageUrl) &&
              data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
+             data.studentName is string && data.studentName.size() > 0 && data.studentName.size() < 100 &&
+             data.studentGrade is string && data.studentGrade.size() > 0 && data.studentGrade.size() < 50 &&
+             data.studentSchool is string && data.studentSchool.size() > 0 && data.studentSchool.size() < 150 &&
+             data.studentCity is string && data.studentCity.size() > 0 && data.studentCity.size() < 100 &&
              data.voteCount is number && data.voteCount >= 0 &&
              data.createdAt is timestamp;
     }

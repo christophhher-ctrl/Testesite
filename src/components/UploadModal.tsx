@@ -21,6 +21,10 @@ export function UploadModal({ competitionId }: UploadModalProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [studentName, setStudentName] = useState('');
+  const [studentGrade, setStudentGrade] = useState('');
+  const [studentSchool, setStudentSchool] = useState('');
+  const [studentCity, setStudentCity] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
@@ -44,7 +48,10 @@ export function UploadModal({ competitionId }: UploadModalProps) {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !file || !title) return;
+    if (!user || !file || !title || !studentName || !studentGrade || !studentSchool || !studentCity) {
+      toast.error('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
 
     setIsUploading(true);
     try {
@@ -58,6 +65,10 @@ export function UploadModal({ competitionId }: UploadModalProps) {
         imageUrl,
         title,
         description,
+        studentName,
+        studentGrade,
+        studentSchool,
+        studentCity,
         voteCount: 0,
         createdAt: serverTimestamp(),
       });
@@ -75,6 +86,10 @@ export function UploadModal({ competitionId }: UploadModalProps) {
   const resetForm = () => {
     setTitle('');
     setDescription('');
+    setStudentName('');
+    setStudentGrade('');
+    setStudentSchool('');
+    setStudentCity('');
     setFile(null);
     setPreview(null);
   };
@@ -85,11 +100,11 @@ export function UploadModal({ competitionId }: UploadModalProps) {
         <Upload className="w-5 h-5" />
         Participar da Competição
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Enviar sua Foto</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleUpload} className="space-y-6 pt-4">
+        <form onSubmit={handleUpload} className="space-y-4 pt-4">
           <div className="space-y-2">
             <Label htmlFor="title">Título da Obra</Label>
             <Input 
@@ -100,6 +115,56 @@ export function UploadModal({ competitionId }: UploadModalProps) {
               required
               disabled={isUploading}
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="studentName">Nome do Aluno</Label>
+              <Input 
+                id="studentName" 
+                placeholder="Seu nome completo" 
+                value={studentName}
+                onChange={(e) => setStudentName(e.target.value)}
+                required
+                disabled={isUploading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="studentGrade">Série</Label>
+              <Input 
+                id="studentGrade" 
+                placeholder="Ex: 9º Ano" 
+                value={studentGrade}
+                onChange={(e) => setStudentGrade(e.target.value)}
+                required
+                disabled={isUploading}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="studentSchool">Escola</Label>
+              <Input 
+                id="studentSchool" 
+                placeholder="Nome da escola" 
+                value={studentSchool}
+                onChange={(e) => setStudentSchool(e.target.value)}
+                required
+                disabled={isUploading}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="studentCity">Cidade</Label>
+              <Input 
+                id="studentCity" 
+                placeholder="Sua cidade" 
+                value={studentCity}
+                onChange={(e) => setStudentCity(e.target.value)}
+                required
+                disabled={isUploading}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">

@@ -38,10 +38,14 @@
         "imageUrl": { "type": "string", "format": "uri" },
         "title": { "type": "string" },
         "description": { "type": "string" },
+        "studentName": { "type": "string" },
+        "studentGrade": { "type": "string" },
+        "studentSchool": { "type": "string" },
+        "studentCity": { "type": "string" },
         "voteCount": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["userId", "competitionId", "imageUrl", "title", "voteCount", "createdAt"]
+      "required": ["userId", "competitionId", "imageUrl", "title", "studentName", "studentGrade", "studentSchool", "studentCity", "voteCount", "createdAt"]
     },
     "Vote": {
       "title": "Vote",

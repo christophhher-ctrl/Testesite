@@ -100,7 +100,13 @@ export function PhotoCard({ photo, hasVoted: initialHasVoted }: PhotoCardProps) 
                 </AspectRatio>
                 <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent text-white">
                   <h3 className="text-2xl font-bold">{photo.title}</h3>
-                  {photo.description && <p className="text-sm text-gray-300 mt-2">{photo.description}</p>}
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-gray-300">
+                    <p><span className="font-semibold text-white">Aluno:</span> {photo.studentName}</p>
+                    <p><span className="font-semibold text-white">Série:</span> {photo.studentGrade}</p>
+                    <p><span className="font-semibold text-white">Escola:</span> {photo.studentSchool}</p>
+                    <p><span className="font-semibold text-white">Cidade:</span> {photo.studentCity}</p>
+                  </div>
+                  {photo.description && <p className="text-sm text-gray-300 mt-3 italic">"{photo.description}"</p>}
                 </div>
               </DialogContent>
             </Dialog>
@@ -108,14 +114,14 @@ export function PhotoCard({ photo, hasVoted: initialHasVoted }: PhotoCardProps) 
         </CardContent>
         <CardFooter className="p-4 flex flex-col gap-3">
           <div className="flex justify-between items-start w-full">
-            <div className="flex flex-col">
-              <h3 className="font-semibold text-lg line-clamp-1">{photo.title}</h3>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <User className="w-3 h-3" />
-                <span>Enviado por um competidor</span>
+            <div className="flex flex-col space-y-1">
+              <h3 className="font-bold text-lg leading-tight line-clamp-1">{photo.title}</h3>
+              <div className="text-xs text-muted-foreground font-medium">
+                <p className="line-clamp-1">{photo.studentName} • {photo.studentGrade}</p>
+                <p className="line-clamp-1">{photo.studentSchool} • {photo.studentCity}</p>
               </div>
             </div>
-            <div className="flex items-center gap-1 font-bold text-primary">
+            <div className="flex items-center gap-1 font-bold text-primary shrink-0">
               <Heart className={`w-4 h-4 ${hasVoted ? 'fill-primary' : ''}`} />
               <span>{photo.voteCount}</span>
             </div>
